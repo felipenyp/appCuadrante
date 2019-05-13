@@ -1,5 +1,7 @@
 {
   "name": "\"Punto Beacon\"",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }
