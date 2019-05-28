@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
 import { Map, latLng, tileLayer, Layer, marker, geoJson } from 'leaflet';
+import { Geolocation } from '@ionic-native/geolocation/ngx';
+import { ToastController } from '@ionic/angular';
+import { CallNumber } from '@ionic-native/call-number/ngx';
 
 declare var arica;
 
@@ -9,6 +12,11 @@ declare var arica;
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
+  constructor(
+    private geolocation: Geolocation,
+    public toastController: ToastController,
+    private callNumber: CallNumber) {}
+
   fono: any = "+56 9 8428 8328";
   cuadrante: any = "3";
   person: any = "Cpt. Rodrigo Salzar Ortega";
@@ -17,6 +25,9 @@ export class HomePage {
 
   buttonClick(number: String){
     console.log('Calling '+number);
+    this.callNumber.callNumber("976984541", true)
+      .then(res => console.log('Launched dialer!', res))
+      .catch(err => console.log('Error launching dialer', err));
   }
 
   ionViewDidEnter(){
@@ -33,6 +44,15 @@ export class HomePage {
       style: this.style,
     }).addTo(this.map);
 
+    this.geolocation.getCurrentPosition().then((resp) => {
+     console.log(resp.coords.latitude);
+     console.log(resp.coords.longitude);
+     this.presentToast("lat: "+resp.coords.latitude+" lon: "+resp.coords.longitude);
+    }).catch((error) => {
+      console.log('Error getting location', error);
+    });
+
+
   }
 
   style(feature) {
@@ -45,5 +65,13 @@ export class HomePage {
       dashArray: '0',
       fillOpacity: 0
     };
+  }
+
+  async presentToast(msg) {
+    const toast = await this.toastController.create({
+      message: msg,
+      duration: 2000
+    });
+    toast.present();
   }
 }
