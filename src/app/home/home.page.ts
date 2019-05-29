@@ -3,6 +3,7 @@ import { Map, latLng, tileLayer, Layer, marker, geoJson, leaflet, icon, iconShad
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { ToastController } from '@ionic/angular';
 import { CallNumber } from '@ionic-native/call-number/ngx';
+import L from 'leaflet';
 
 declare var arica;
 
@@ -12,12 +13,8 @@ declare var arica;
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
-  constructor(
-    private geolocation: Geolocation,
-    public toastController: ToastController,
-    private callNumber: CallNumber) {}
-
   fono: any = "+56 9";
+  showFono: any = "+56 9";
   desc_cuadrante: any = "Desconocido";
   person: any = "Sin identificación";
   comisaria: any = "Ninguna comisaría asociada";
@@ -27,17 +24,10 @@ export class HomePage {
   id: any;
   cuadrante: any;
 
-  constructor(private geolocation: Geolocation) {
-    this.geolocation.getCurrentPosition().then((resp) => {
-      this.lat = resp.coords.latitude;
-      this.lng = resp.coords.longitude;
-      this.cuadrante = this.getCuadrante(this.lat, this.lng)
-      this.setData(this.cuadrante);
+  constructor(private geolocation: Geolocation,
+  public toastController: ToastController,
+  private callNumber: CallNumber) {
 
-
-     }).catch((error) => {
-       console.log('Error getting location', error);
-     });
   }
 
   buttonClick(number: String){
@@ -52,7 +42,6 @@ export class HomePage {
     let mapboxAccessToken = 'pk.eyJ1Ijoic3VwZXJzYngwMCIsImEiOiJjaWpsZ3FsN3QwMDIydGhtNTh4aGhubG5xIn0.i2J0k0mBZhIi7W-bsPTJiQ';
 
     this.map = new Map('map').setView([-18.5, -70], 12);
-    this.drawPolygon(this.id);
     //L.marker([this.lat, this.lng]).addTo(this.map);
 
     tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + mapboxAccessToken, {
@@ -64,14 +53,17 @@ export class HomePage {
     }).addTo(this.map);
 
     this.geolocation.getCurrentPosition().then((resp) => {
-     console.log(resp.coords.latitude);
-     console.log(resp.coords.longitude);
-     this.presentToast("lat: "+resp.coords.latitude+" lon: "+resp.coords.longitude);
-    }).catch((error) => {
-      console.log('Error getting location', error);
-    });
+      this.lat = resp.coords.latitude;
+      this.lng = resp.coords.longitude;
+      console.log(this.lat, this.lng);
+      this.cuadrante = this.getCuadrante(this.lat, this.lng)
+      this.setData(this.cuadrante);
 
+      this.drawPolygon(this.id);
 
+     }).catch((error) => {
+       console.log('Error getting location', error);
+     });
   }
 
   style(feature) {
@@ -124,6 +116,7 @@ export class HomePage {
     console.log(cuadrante.cua_descri);
     this.desc_cuadrante = cuadrante.cua_descri;
     this.fono = cuadrante.num_cuadrante;
+    this.showFono = this.prettyPhone(this.fono);
     this.comisaria = cuadrante.unidad;
     this.id = cuadrante.id
   }
@@ -178,5 +171,10 @@ export class HomePage {
         this.map.setView([this.lat, this.lng], 13);
       }
     });
+  }
+
+  prettyPhone(fono: String){
+    var input = fono.toString();
+    return '+56 '+ input.substr(0,1)+' '+input.substr(1,4)+' '+input.substr(5,4);
   }
 }
