@@ -3,8 +3,11 @@
   padding: 0;
 }
 
+ion-content{
+  --ion-background-color:#219a2a8c;
+}
+
 .background {
-  background: white;
   width: 100%;
   height: 100%;
 }
@@ -12,6 +15,7 @@
 .card{
   margin: 10px;
   padding: 5px;
+  background: white;
 }
 
 .map-card{
