@@ -1,7 +1,7 @@
 {
-  "name": "punto-beacon",
-  "version": "0.0.1",
-  "author": "Ionic Framework",
+  "name": "AppCuadrante",
+  "version": "1.0.0",
+  "author": "EticasTeam",
   "homepage": "https://ionicframework.com/",
   "scripts": {
     "ng": "ng",

@@ -23,6 +23,7 @@ export class HomePage {
   lng: any;
   id: any;
   cuadrante: any;
+  polygon: any;
 
   constructor(private geolocation: Geolocation,
   public toastController: ToastController,
@@ -32,7 +33,7 @@ export class HomePage {
 
   buttonClick(number: String){
     console.log('Calling '+number);
-    this.callNumber.callNumber("976984541", true)
+    this.callNumber.callNumber(this.fono, true)
       .then(res => console.log('Launched dialer!', res))
       .catch(err => console.log('Error launching dialer', err));
   }
@@ -51,6 +52,29 @@ export class HomePage {
     let geojson = geoJson(arica, {
       style: this.style,
     }).addTo(this.map);
+
+    geojson.on('click',(feature:any)=>{
+      let prop = feature.sourceTarget.feature.properties;
+      this.setData(prop);
+      arica.features.forEach(element => {
+        let matrix = [];
+        if(element.properties.id == prop.id){
+          /* Se invierten lat y lng */
+          element.geometry.coordinates.forEach(element => {
+            element.forEach(element => {
+              element.forEach(element => {
+                let aux;
+                aux = element[0];
+                element[0] = element[1];
+                element[1] = aux;
+                matrix.push(element);
+              });
+            });
+          });
+          this.map.setView([feature.latlng.lat, feature.latlng.lng], 13);
+        }
+      });
+    });
 
     this.geolocation.getCurrentPosition().then((resp) => {
       this.lat = resp.coords.latitude;
@@ -116,7 +140,11 @@ export class HomePage {
     console.log(cuadrante.cua_descri);
     this.desc_cuadrante = cuadrante.cua_descri;
     this.fono = cuadrante.num_cuadrante;
-    this.showFono = this.prettyPhone(this.fono);
+    if(this.fono){
+      this.showFono = this.prettyPhone(this.fono);
+    } else {
+      this.showFono = "No hay número asociado";
+    }
     this.comisaria = cuadrante.unidad;
     this.id = cuadrante.id
   }
@@ -166,8 +194,9 @@ export class HomePage {
             });
           });
         });
-        var polygon = L.polygon(matrix).addTo(this.map);
-        polygon.bindTooltip(element.properties.cua_descri, {permanent: true, direction:"center"}).openTooltip()
+        this.polygon = L.polygon(matrix);
+        this.polygon.addTo(this.map);
+        this.polygon.bindTooltip(element.properties.cua_descri, {permanent: true, direction:"center"}).openTooltip();
         this.map.setView([this.lat, this.lng], 13);
       }
     });
